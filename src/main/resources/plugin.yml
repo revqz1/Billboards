@@ -1,0 +1,16 @@
+name: MinhutBillboards
+version: '${version}'
+main: me.revqz.minhutBillboards.MinhutBillboards
+api-version: '1.21'
+description: A billboard plugin for displaying images on map walls
+
+commands:
+  billboard:
+    description: Billboard management commands
+    usage: /<command> <spawn>
+    permission: billboard.admin
+
+permissions:
+  billboard.admin:
+    description: Allows access to billboard commands
+    default: op
