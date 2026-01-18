@@ -1,37 +1,26 @@
-# MinhutBillboards Configuration
 
-# Define multiple billboards with different settings
-# Usage: /billboard spawn <name>
 billboards:
-  # Example billboard - "promo"
-  promo:
+  billboard2:
     width: 6
     height: 5
     material: BLACK_CONCRETE
-    image: "promo.png"
+    image: "billboard2.png"
   
-  # Example billboard - "ad1"
-  ad1:
+  billboard1:
     width: 8
     height: 6
     material: BLACK_CONCRETE
-    image: "ad1.png"
+    image: "billboard1.png"
   
-  # Example billboard - "welcome"
-  welcome:
+  billboard0:
     width: 10
     height: 8
     material: GRAY_CONCRETE
-    image: "welcome.png"
+    image: "billboard0.png"
 
 # Visual effects settings
 effects:
-  # Glow effect when player looks at billboard
   glow_when_looking: true
   glow_color: GREEN
-  # Range in blocks to detect player looking
   look_range: 32
-  
-  # Color dithering mode for image quality
-  # Options: floyd_steinberg (best quality), ordered (faster), none (no dithering)
   dithering: floyd_steinberg

@@ -1,5 +1,5 @@
 name: MinhutBillboards
-version: '${version}'
+version: '1.21.4 - 1.21.11'
 main: me.revqz.minhutBillboards.MinhutBillboards
 api-version: '1.21'
 description: A billboard plugin for displaying images on map walls

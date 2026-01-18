@@ -14,6 +14,7 @@ public final class MinhutBillboards extends JavaPlugin {
     public void onEnable() {
         instance = this;
         saveDefaultConfig();
+
         File imagesFolder = new File(getDataFolder(), "images");
         if (!imagesFolder.exists()) {
             imagesFolder.mkdirs();
@@ -21,6 +22,7 @@ public final class MinhutBillboards extends JavaPlugin {
         }
 
         BillboardManager.getInstance();
+
         BillboardCommand billboardCommand = new BillboardCommand();
         getCommand("billboard").setExecutor(billboardCommand);
         getCommand("billboard").setTabCompleter(billboardCommand);

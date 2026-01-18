@@ -9,17 +9,10 @@ import java.io.File;
 import java.net.URL;
 import java.util.concurrent.CompletableFuture;
 
-/**
- * Handles loading and processing images for billboards.
- * Images can be loaded from URLs or local files in the images folder.
- */
 public class ImageLoader {
 
-    private static final int MAP_SIZE = 128; // Minecraft maps are 128x128 pixels
+    private static final int MAP_SIZE = 128;
 
-    /**
-     * Loads an image from a URL asynchronously.
-     */
     public static CompletableFuture<BufferedImage> loadImageFromUrl(String imageUrl) {
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -38,9 +31,6 @@ public class ImageLoader {
         });
     }
 
-    /**
-     * Loads an image from the local images folder asynchronously.
-     */
     public static CompletableFuture<BufferedImage> loadImageFromFile(String filename) {
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -72,11 +62,6 @@ public class ImageLoader {
         });
     }
 
-    /**
-     * Loads an image from either a URL or local file.
-     * If the source starts with http:// or https://, it's treated as a URL.
-     * Otherwise, it's treated as a filename in the images folder.
-     */
     public static CompletableFuture<BufferedImage> loadImage(String source) {
         if (source.startsWith("http://") || source.startsWith("https://")) {
             return loadImageFromUrl(source);
@@ -85,9 +70,6 @@ public class ImageLoader {
         }
     }
 
-    /**
-     * Resizes an image to fit the billboard dimensions.
-     */
     public static BufferedImage resizeImage(BufferedImage image, int widthBlocks, int heightBlocks) {
         int targetWidth = widthBlocks * MAP_SIZE;
         int targetHeight = heightBlocks * MAP_SIZE;
@@ -95,7 +77,6 @@ public class ImageLoader {
         BufferedImage resized = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = resized.createGraphics();
 
-        // Use highest quality rendering
         g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
         g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -108,19 +89,13 @@ public class ImageLoader {
         return resized;
     }
 
-    /**
-     * Splits an image into 128x128 tiles for map rendering.
-     * Tiles are arranged in a 2D array [x][y] where:
-     * - x goes from left to right (0 to widthBlocks-1)
-     * - y goes from BOTTOM to TOP (0 is bottom, heightBlocks-1 is top)
-     */
     public static BufferedImage[][] splitIntoTiles(BufferedImage image, int widthBlocks, int heightBlocks) {
         BufferedImage[][] tiles = new BufferedImage[widthBlocks][heightBlocks];
 
         for (int x = 0; x < widthBlocks; x++) {
             for (int y = 0; y < heightBlocks; y++) {
                 int pixelX = x * MAP_SIZE;
-                int pixelY = (heightBlocks - 1 - y) * MAP_SIZE; // Flip Y
+                int pixelY = (heightBlocks - 1 - y) * MAP_SIZE;
 
                 tiles[x][y] = image.getSubimage(pixelX, pixelY, MAP_SIZE, MAP_SIZE);
             }
@@ -129,11 +104,6 @@ public class ImageLoader {
         return tiles;
     }
 
-    /**
-     * Loads, resizes, dithers, and splits an image in one operation.
-     * Supports both URLs and local filenames.
-     * Applies dithering based on config settings for better color accuracy.
-     */
     public static CompletableFuture<BufferedImage[][]> loadAndProcessImage(String source, int widthBlocks,
             int heightBlocks) {
         return loadImage(source).thenApply(image -> {
@@ -141,10 +111,8 @@ public class ImageLoader {
                 return null;
             }
 
-            // Resize the image first
             BufferedImage resized = resizeImage(image, widthBlocks, heightBlocks);
 
-            // Apply dithering based on config
             String ditheringMode = MinhutBillboards.getInstance().getConfig()
                     .getString("effects.dithering", "floyd_steinberg");
 

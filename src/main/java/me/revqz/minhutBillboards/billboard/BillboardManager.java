@@ -15,10 +15,6 @@ import org.bukkit.scoreboard.Team;
 
 import java.util.*;
 
-/**
- * Manages active billboards with glow effects, block tracking, and undo
- * support.
- */
 public class BillboardManager {
 
     private static BillboardManager instance;
@@ -47,13 +43,11 @@ public class BillboardManager {
     private void setupGlowTeam() {
         Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
 
-        // Remove old team if exists
         Team oldTeam = scoreboard.getTeam("billboard_glow");
         if (oldTeam != null) {
             oldTeam.unregister();
         }
 
-        // Create fresh team
         glowTeam = scoreboard.registerNewTeam("billboard_glow");
         glowTeam.color(NamedTextColor.GREEN);
         glowTeam.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
@@ -78,17 +72,15 @@ public class BillboardManager {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 checkPlayerLooking(player, range);
             }
-        }, 5L, 5L); // Check more frequently for responsiveness
+        }, 5L, 5L);
     }
 
     private void checkPlayerLooking(Player player, int range) {
         String currentlyLookingAt = playerLookingAt.get(player.getUniqueId());
         String nowLookingAt = null;
 
-        // Get the block the player is looking at
         Block targetBlock = player.getTargetBlockExact(range);
         if (targetBlock != null) {
-            // Check for billboard frames near this block
             for (Entity entity : targetBlock.getWorld().getNearbyEntities(
                     targetBlock.getLocation().add(0.5, 0.5, 0.5), 2.5, 2.5, 2.5)) {
                 if (entity instanceof ItemFrame frame && frame.getScoreboardTags().contains(BILLBOARD_TAG)) {
@@ -101,7 +93,6 @@ public class BillboardManager {
             }
         }
 
-        // Only update if state changed
         if (!Objects.equals(currentlyLookingAt, nowLookingAt)) {
             if (currentlyLookingAt != null) {
                 setGlowState(currentlyLookingAt, false);
@@ -126,11 +117,8 @@ public class BillboardManager {
         for (UUID frameId : data.frameIds) {
             Entity entity = Bukkit.getEntity(frameId);
             if (entity instanceof ItemFrame frame && frame.isValid()) {
-                // Set glowing state
                 frame.setGlowing(glowing);
 
-                // Add/remove from team by entity UUID
-                // The team entry must be the entity's UUID as a string
                 String entry = frame.getUniqueId().toString();
                 try {
                     if (glowing) {
@@ -143,15 +131,11 @@ public class BillboardManager {
                         }
                     }
                 } catch (Exception e) {
-                    // Ignore team errors
                 }
             }
         }
     }
 
-    /**
-     * Registers a billboard with its frames and block locations.
-     */
     public void registerBillboard(String name, List<ItemFrame> frames, List<Location> blockLocations) {
         String lowerName = name.toLowerCase();
         BillboardData data = new BillboardData();
@@ -161,7 +145,6 @@ public class BillboardManager {
             data.frameIds.add(id);
             frameToBoard.put(id, lowerName);
 
-            // Tag the frame for identification
             frame.addScoreboardTag(BILLBOARD_TAG);
         }
 
@@ -172,9 +155,6 @@ public class BillboardManager {
                 .info("Registered billboard: " + lowerName + " with " + frames.size() + " frames");
     }
 
-    /**
-     * Removes a billboard, its frames, AND the wall blocks.
-     */
     public void removeBillboard(String name) {
         String lowerName = name.toLowerCase();
         BillboardData data = billboards.remove(lowerName);
@@ -182,10 +162,8 @@ public class BillboardManager {
         if (data == null)
             return;
 
-        // Remove glow first
         setGlowState(lowerName, false);
 
-        // Remove item frames
         for (UUID frameId : data.frameIds) {
             frameToBoard.remove(frameId);
             Entity entity = Bukkit.getEntity(frameId);
@@ -194,7 +172,6 @@ public class BillboardManager {
             }
         }
 
-        // Remove the wall blocks
         for (Location loc : data.blockLocations) {
             Block block = loc.getBlock();
             block.setType(Material.AIR);

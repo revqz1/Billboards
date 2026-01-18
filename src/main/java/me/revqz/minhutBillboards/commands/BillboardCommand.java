@@ -29,7 +29,6 @@ import java.util.*;
 
 public class BillboardCommand implements CommandExecutor, TabCompleter {
 
-    // Track last spawned billboard per player for undo
     private final Map<UUID, String> lastSpawnedBillboard = new HashMap<>();
 
     @Override
@@ -130,37 +129,29 @@ public class BillboardCommand implements CommandExecutor, TabCompleter {
             material = Material.BLACK_CONCRETE;
         }
 
-        // Get the block the player is looking at - this is where the billboard will
-        // spawn
         Block targetBlock = player.getTargetBlockExact(50);
         if (targetBlock == null || targetBlock.getType() == Material.AIR) {
             player.sendMessage(Component.text("Look at a block to spawn the billboard there!", NamedTextColor.RED));
             return;
         }
 
-        // Get direction from player to target block (billboard faces the player)
         Location playerLoc = player.getLocation();
         Location targetLoc = targetBlock.getLocation().add(0.5, 0.5, 0.5);
         BlockFace facing = getDirectionToPlayer(targetLoc, playerLoc);
-        BlockFace frameFacing = facing; // Frames face towards player
+        BlockFace frameFacing = facing;
 
-        // Start from the target block
         Location startLoc = targetBlock.getLocation().clone();
 
-        // Get the width direction (perpendicular to facing)
         BlockFace widthDirection = getWidthDirection(facing);
 
-        // Center the wall around the target point
         int halfWidth = wallWidth / 2;
         startLoc.add(
                 widthDirection.getModX() * -halfWidth,
                 0,
                 widthDirection.getModZ() * -halfWidth);
 
-        // Track block locations for undo
         List<Location> blockLocations = new ArrayList<>();
 
-        // Place the concrete blocks
         for (int y = 0; y < wallHeight; y++) {
             for (int w = 0; w < wallWidth; w++) {
                 Location blockLoc = startLoc.clone().add(
@@ -174,11 +165,9 @@ public class BillboardCommand implements CommandExecutor, TabCompleter {
             }
         }
 
-        // Storage for maps and frames
         MapView[][] mapViews = new MapView[wallWidth][wallHeight];
         List<ItemFrame> spawnedFrames = new ArrayList<>();
 
-        // Place item frames with maps on the front of the wall
         int framesPlaced = 0;
         for (int y = 0; y < wallHeight; y++) {
             for (int w = 0; w < wallWidth; w++) {
@@ -187,7 +176,6 @@ public class BillboardCommand implements CommandExecutor, TabCompleter {
                         y,
                         widthDirection.getModZ() * w);
 
-                // Get the block in front (facing the player)
                 Block frontBlock = blockLoc.getBlock().getRelative(frameFacing);
                 Location frameLoc = frontBlock.getLocation();
 
@@ -213,19 +201,16 @@ public class BillboardCommand implements CommandExecutor, TabCompleter {
                     spawnedFrames.add(frame);
                     framesPlaced++;
                 } catch (Exception e) {
-                    // Frame placement failed, continue
                 }
             }
         }
 
-        // Register billboard with manager (includes block locations for undo)
         String uniqueName = billboardName + "_" + System.currentTimeMillis();
         BillboardManager.getInstance().registerBillboard(uniqueName, spawnedFrames, blockLocations);
         lastSpawnedBillboard.put(player.getUniqueId(), uniqueName);
 
         final int finalFramesPlaced = framesPlaced;
 
-        // Load and apply image
         if (imageSource != null && !imageSource.isEmpty()) {
             player.sendMessage(Component.text("⏳ ", NamedTextColor.YELLOW)
                     .append(Component.text("Loading image...", NamedTextColor.GRAY)));
@@ -266,10 +251,6 @@ public class BillboardCommand implements CommandExecutor, TabCompleter {
                         NamedTextColor.DARK_GRAY)));
     }
 
-    /**
-     * Gets the direction from target to player (which cardinal direction the
-     * billboard should face).
-     */
     private BlockFace getDirectionToPlayer(Location target, Location player) {
         double dx = player.getX() - target.getX();
         double dz = player.getZ() - target.getZ();
@@ -281,15 +262,10 @@ public class BillboardCommand implements CommandExecutor, TabCompleter {
         }
     }
 
-    /**
-     * Gets the direction to expand the wall width based on facing direction.
-     * Wall always expands in the same direction (positive) for each axis pair
-     * to ensure tiles align correctly.
-     */
     private BlockFace getWidthDirection(BlockFace facing) {
         return switch (facing) {
-            case NORTH, SOUTH -> BlockFace.EAST; // Wall runs along X axis
-            case EAST, WEST -> BlockFace.SOUTH; // Wall runs along Z axis
+            case NORTH, SOUTH -> BlockFace.EAST;
+            case EAST, WEST -> BlockFace.SOUTH;
             default -> BlockFace.EAST;
         };
     }
@@ -307,10 +283,9 @@ public class BillboardCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        // This now removes both frames AND blocks
         BillboardManager.getInstance().removeBillboard(lastBillboard);
         player.sendMessage(Component.text("✓ ", NamedTextColor.GREEN)
-                .append(Component.text("Billboard undone! (frames + blocks removed)", NamedTextColor.GRAY)));
+                .append(Component.text("Billboard undone!", NamedTextColor.GRAY)));
     }
 
     private void removeBillboard(Player player, String name) {
@@ -346,7 +321,7 @@ public class BillboardCommand implements CommandExecutor, TabCompleter {
         player.sendMessage(Component.text("  /billboard spawn <name>", NamedTextColor.YELLOW)
                 .append(Component.text(" - Spawn at block you're looking at", NamedTextColor.GRAY)));
         player.sendMessage(Component.text("  /billboard undo", NamedTextColor.YELLOW)
-                .append(Component.text(" - Undo last billboard (removes blocks too)", NamedTextColor.GRAY)));
+                .append(Component.text(" - Undo last billboard", NamedTextColor.GRAY)));
         player.sendMessage(Component.text("  /billboard remove <name>", NamedTextColor.YELLOW)
                 .append(Component.text(" - Remove a spawned billboard", NamedTextColor.GRAY)));
         player.sendMessage(Component.text("  /billboard list", NamedTextColor.YELLOW)
