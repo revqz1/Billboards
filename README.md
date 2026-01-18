@@ -9,7 +9,6 @@ A Minecraft plugin for displaying images on large map billboards.
 | Description | Preview |
 |-------------|---------|
 | Billboard Example | ![Screenshot](screenshots/example.png) |
-| Glow Effect | ![Screenshot](screenshots/glow.png) |
 
 ---
 
